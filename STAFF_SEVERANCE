@@ -1,0 +1,229 @@
+create database Employees;
+use employees;
+   create table Employee_Data (
+                   Staff_ID int not null,
+	                 First_name varchar(50), 
+                   Last_name varchar(50),
+                   age int,
+	                 Gender varchar(50),
+	                 Geopolitical_zone varchar(50), 
+	                 DOB date,
+                   Start_Date date, 
+                   Exit_Date date
+                       );
+	   
+    create table Employee_Promotion (
+	                Staff_ID int not null,
+	                First_name varchar(50), 
+                  Last_name varchar(50),
+                  Staff_Rank varchar(50), 
+                  Staff_Level int not null
+                        );
+	 create table Employee_Emoluments (
+                 Staff_Rank varchar(50), 
+                 Staff_Level int not null,
+                 Basic_Emoluments int not null, 
+                 Holiday_Emoluments int not null, 
+                 Leave_Allowance int not null, 
+                 Communication_Emoluments int not null, 
+                13th_Month_Emoluments int not null
+                         );
+
+insert into Employee_Data (Staff_ID, First_name, Last_Name, age, Gender, Geopolitical_zone, DOB, Start_Date, Exit_Date)
+                values 
+                (1001, 'Peter', 'Godfrey', 44, 'Male', 'North', '1980-05-22', '2002-12-06', null),
+                (1011, 'Kenneth', 'Ndukwe', 50, 'Male', 'South_East', '1974-01-19', '2002-12-06', '2015-05-17'),
+                (1012, 'Sarah', 'Obi', 39, 'Female', 'South_East', '1985-03-02', '2006-12-06', '2017-09-22'),
+                (1013, 'Samuel', 'Obot', 40, 'Male', 'South_South', '1984-04-07', '2009-06-12', '2023-07-22'),
+                (1014, 'Zainab', 'Bashar', 35, 'Female', 'North', '1989-09-06', '2009-06-12', null),
+                (1015, 'Chike', 'Callistus', 27, 'Male', 'South_East', '1997-07-09', '2020-01-05', null),
+                (1016, 'Barbara', 'Micheal', 28, 'Female', 'North_West', '1996-07-09', '2020-03-01', null),
+                (1017, 'Veronica', 'Ogunwale', 25, 'Female', 'North_West', '1999-07-02', '2022-01-03', null),
+                (1018, 'Wisdom', 'Chimezie', 30, 'Male', 'South_South', '1994-01-03', '2022-01-03', null),
+                (1019, 'Grace', 'Musa', 30, 'Female', 'North', '1994-04-14', '2022-03-01', '2023-04-05');
+        
+	insert into Employee_Promotion(Staff_ID, First_name, Last_Name, Staff_Rank, Staff_Level)
+                 values 
+                (1001, 'Peter', 'Godfrey', 'CEO', 0),
+                (1011, 'Kenneth', 'Ndukwe', 'CFO', 5),
+                (1012, 'Sarah', 'Obi', 'Manager', 1),
+                (1013, 'Samuel', 'Obot', 'Technical_Analyst', 4),
+                (1014, 'Zainab', 'Bashar', 'Manager', 1),
+                (1015, 'Chike', 'Callistus', 'Junior_Analyst', 4),
+                (1016, 'Barbara', 'Micheal', 'Senior_Analyst', 1),
+                (1017, 'Veronica', 'Ogunwale', 'Consultant', 0),
+                (1018, 'Wisdom', 'Chimezie', 'Assistant_Manager', 3),
+                (1019, 'Grace', 'Musa', 'Junior_Analyst', 2);
+        
+	insert into Employee_Emoluments (Staff_Rank, Staff_Level, Basic_Emoluments, Holiday_Emoluments, Leave_Allowance, Communication_Emoluments, 13th_Month_Emoluments)
+        values
+              ('CEO', 0, 1000000, 2000000, 70000, 100000, 1500000),
+              ('CFO', 5, 945000, 1000000, 60000, 50000, 1000000),
+              ('CFO', 2, 900000, 1000000, 60000, 50000,  950000),
+              ('Manager', 5, 500000, 750000, 30000, 25000, 550000),
+              ('Manager', 1, 450000, 500000, 25000,20000, 500000),
+              ('Senior_Analyst', 1, 700000, 850000, 50000, 40000, 750000),
+              ('Technical_Analyst', 4, 550000, 800000, 35000, 30000, 600000), 
+              ('Consultant', 0, 850000, 925000, 55000, 45000, 925000),
+              ('Assistant_Manager', 3, 400000, 0, 20000, 15000, 450000),
+              ('Junior_Analyst', 2, 250000, 0, 10000, 5000, 275000);
+	
+SELECT * FROM employees.employee_data;
+SELECT * FROM employees.employee_emoluments;
+SELECT * FROM employees.employee_promotion;
+    
+select 
+             sum(Basic_Emoluments) as Paid_emoluments, sum(Holiday_Emoluments) as Paid_Holiday_paid, sum(Leave_Allowance) as Paid_Leave, sum(Communication_Emoluments) as Paid_Communication, sum(13th_Month_Emoluments) as Paid_13th_Month
+             from employees.employee_data as employee_data
+             inner join employees.employee_promotion as employee_promotion
+             on employee_data.Staff_ID=employee_promotion.Staff_ID
+             left join employees.employee_emoluments as employee_emoluments
+             on employee_promotion.Staff_Rank=employee_emoluments.Staff_Rank 
+Where 
+            Exit_Date is null;
+        
+select 
+            distinct *
+from 
+            employee_data
+where 
+           Start_Date >= "2014-01-01"
+and 
+           Exit_Date is null;
+
+alter table employee_data
+add column Eligible_For_Promotion varchar(50);
+        
+alter table employee_data
+drop column eligible_for_promotion;
+        
+alter table employee_promotion
+add column Eligible_For_Promotion varchar(50);
+
+## to show staff eligible for promotion
+update employees.employee_promotion as employee_promotion
+                 join employees.employee_data as employee_data
+                 on employee_data.Staff_ID=employee_promotion.Staff_ID
+set employee_promotion.Eligible_For_Promotion = 'Eligible'
+                 where employee_data.Start_Date >= "2014-01-01"
+                 and employee_data.Exit_Date is null
+                 and employee_data.Start_Date is not null;
+        
+##to show gender balace in work place 
+select 
+            employee_data.Gender, 
+            employee_emoluments.staff_Rank, 
+            avg(Basic_Emoluments) as Average_Emoluments
+from employee_emoluments
+        join employee_promotion
+        on employee_emoluments.staff_rank=employee_promotion.staff_rank
+        join employee_data
+        on employee_promotion.Staff_ID=employee_data.Staff_ID
+group by 
+        employee_data.Gender, employee_emoluments.Staff_Rank
+order by
+        avg(Basic_Emoluments);
+
+##to calculate the daily emoluments of staff
+select 
+       employee_promotion.Staff_ID,
+	     employee_promotion.First_name,
+       employee_promotion.Last_name,
+       employee_emoluments.Basic_Emoluments,
+	     employee_emoluments.Basic_Emoluments/30.0 as Daily_emoluments
+from employee_emoluments
+join employee_promotion
+on employee_emoluments.Staff_Rank=employee_promotion.Staff_Rank
+group by 
+      employee_promotion.Staff_ID,
+	    employee_promotion.First_name,
+      employee_promotion.Last_name,
+      employee_emoluments.Basic_Emoluments;
+
+##to calculate monthly tax from the untaxed 13th month 
+select
+  employee_data.Staff_ID,
+  employee_promotion.First_name,
+  employee_promotion.Last_name,
+  employee_emoluments.Staff_Rank,
+  employee_emoluments.Basic_Emoluments,
+  employee_emoluments.13th_Month_Emoluments,
+  13th_month_Emoluments - Basic_Emoluments as monthly_tax_paid
+FROM
+   employee_emoluments
+JOIN employee_promotion
+   ON employee_emoluments.Staff_Rank = employee_promotion.Staff_Rank
+JOIN employee_data
+   ON employee_promotion.Staff_ID = employee_data.Staff_ID
+GROUP BY
+   employee_data.Staff_ID,
+   employee_promotion.First_name,
+   employee_promotion.Last_name,
+   employee_emoluments.Staff_Rank,
+   employee_emoluments.Basic_Emoluments,
+   employee_emoluments.13th_Month_Emoluments;
+
+##calculate severance to be paid to all staff based on all emoluments 
+alter table employee_data
+add column Years_employed int;
+
+update employee_data
+set Years_employed = TIMESTAMPDIFF(YEAR, Start_Date, '2023-12-31')
+WHERE EMPLOYEE_DATA.START_DATE >= '2002-01-07';
+
+alter table employee_data
+add column Percentage varchar (50);
+
+##update employee_data
+update employee_data
+set Percentage = case
+   when years_employed > 2 and years_employed <= 6 then "5%"
+   when years_employed >= 6 and years_employed < 12 then "10%"
+   when years_employed >= 12 and years_employed < 17 then "15%"
+   when years_employed >= 17 then "20%"
+   else 'not_eligible'
+end;
+
+alter table employee_emoluments
+Add column Total_Emoluments int;
+
+update employee_emoluments
+set Total_Emoluments = Basic_Emoluments + 
+					             Communication_Emoluments + 
+                       Holiday_Emoluments + 
+                       Leave_Allowance + 
+                       13th_Month_Emoluments;
+
+##calculate the severance per staff & Summit findings to the Accounts department
+select
+     Severance_to_be_paid.Staff_ID,
+    Severance_to_be_paid.First_name,
+    Severance_to_be_paid.Last_name,
+   (Severance_to_be_paid.Total_Emoluments * Severance_to_be_paid.Percentage/100) *12
+   as Severance
+from 
+   (
+select
+  employee_data.Staff_ID,
+  employee_data.First_name,
+  employee_data.Last_name,
+  employee_data.Exit_Date,
+  employee_data.Percentage,
+  employee_promotion.staff_rank,
+  employee_emoluments.Total_Emoluments
+from 
+  employee_data
+join employee_promotion
+on employee_data.Staff_ID=employee_promotion.Staff_ID
+join employee_emoluments
+on employee_emoluments.Staff_Rank=employee_promotion.Staff_Rank
+ ) as  Severance_to_be_paid
+ group by  
+	  Severance_to_be_paid.Staff_ID,
+    Severance_to_be_paid.First_name,
+    Severance_to_be_paid.Last_name,
+    (Severance_to_be_paid.Total_Emoluments * Severance_to_be_paid.Percentage/100) *12;
+  
+  
+  
+  
