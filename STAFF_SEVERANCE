@@ -1,3 +1,6 @@
+##DEVELOP A SHEET TO CONFIRM BUDGET NEEDED TO PAY STAFF SEVERANCE FROM INCEPTION OF THE ORGANISATION 
+
+##CREATE THE DATA##
 create database Employees;
 use employees;
    create table Employee_Data (
@@ -28,7 +31,7 @@ use employees;
                  Communication_Emoluments int not null, 
                 13th_Month_Emoluments int not null
                          );
-
+##INSERT VALUES INTO THE DATA##
 insert into Employee_Data (Staff_ID, First_name, Last_Name, age, Gender, Geopolitical_zone, DOB, Start_Date, Exit_Date)
                 values 
                 (1001, 'Peter', 'Godfrey', 44, 'Male', 'North', '1980-05-22', '2002-12-06', null),
@@ -67,11 +70,12 @@ insert into Employee_Data (Staff_ID, First_name, Last_Name, age, Gender, Geopoli
               ('Consultant', 0, 850000, 925000, 55000, 45000, 925000),
               ('Assistant_Manager', 3, 400000, 0, 20000, 15000, 450000),
               ('Junior_Analyst', 2, 250000, 0, 10000, 5000, 275000);
-	
+##VIEW DATA##	
 SELECT * FROM employees.employee_data;
 SELECT * FROM employees.employee_emoluments;
 SELECT * FROM employees.employee_promotion;
-    
+
+##CONFIRM STAFF THAT ARE STILL WORKING IN THE ORGANISATION##
 select 
              sum(Basic_Emoluments) as Paid_emoluments, sum(Holiday_Emoluments) as Paid_Holiday_paid, sum(Leave_Allowance) as Paid_Leave, sum(Communication_Emoluments) as Paid_Communication, sum(13th_Month_Emoluments) as Paid_13th_Month
              from employees.employee_data as employee_data
@@ -81,7 +85,8 @@ select
              on employee_promotion.Staff_Rank=employee_emoluments.Staff_Rank 
 Where 
             Exit_Date is null;
-        
+
+##CONFIRM STAFF THAT ARE STILL WORKING IN THE ORGANISATION##       
 select 
             distinct *
 from 
@@ -91,6 +96,7 @@ where
 and 
            Exit_Date is null;
 
+##ADD ANOTHER COLUMN TO SHOW STAFF ELIGIBLE FOR PROMOTION##
 alter table employee_data
 add column Eligible_For_Promotion varchar(50);
         
@@ -109,7 +115,7 @@ set employee_promotion.Eligible_For_Promotion = 'Eligible'
                  and employee_data.Exit_Date is null
                  and employee_data.Start_Date is not null;
         
-##to show gender balace in work place 
+##TO SHOW UNBIAS, CONFIRM IF THEY IS GENDER EQUALITY IN THE ORGANISATION##
 select 
             employee_data.Gender, 
             employee_emoluments.staff_Rank, 
@@ -124,7 +130,7 @@ group by
 order by
         avg(Basic_Emoluments);
 
-##to calculate the daily emoluments of staff
+##TO CONFIRM IF THE DAILY EMOLUMENTS IS EQUAL TO THE MINIMUM WAGE##
 select 
        employee_promotion.Staff_ID,
 	     employee_promotion.First_name,
@@ -140,7 +146,7 @@ group by
       employee_promotion.Last_name,
       employee_emoluments.Basic_Emoluments;
 
-##to calculate monthly tax from the untaxed 13th month 
+##SHOW TAX THAT IS BEEN DEDUCTED MONTHLY FROM BASIC EMOLUMENTS##
 select
   employee_data.Staff_ID,
   employee_promotion.First_name,
@@ -163,14 +169,16 @@ GROUP BY
    employee_emoluments.Basic_Emoluments,
    employee_emoluments.13th_Month_Emoluments;
 
-##calculate severance to be paid to all staff based on all emoluments 
+##CALCULATE SEVERANCE TO BE PAID TO ALL STAFF BASED ON ALL EMOLUMENTS BY CONFIRMING THE YEARS EACH PERSON HAS WORKED AND INCLUDING THE PERCENTAGES TO PE PAID##
 alter table employee_data
 add column Years_employed int;
 
+##CONFIRM THE YEARS EACH PERSON WORKED IN THE ORGANISATION##
 update employee_data
 set Years_employed = TIMESTAMPDIFF(YEAR, Start_Date, '2023-12-31')
 WHERE EMPLOYEE_DATA.START_DATE >= '2002-01-07';
 
+##ADD PERCENTAGED TO CALCULATE SEVERANCE##
 alter table employee_data
 add column Percentage varchar (50);
 
@@ -184,45 +192,46 @@ set Percentage = case
    else 'not_eligible'
 end;
 
+##CONFIRM THE SEVERANCE TO BE PAID & SUMMIT FINDINGS##
 alter table employee_emoluments
 Add column Total_Emoluments int;
 
 update employee_emoluments
 set Total_Emoluments = Basic_Emoluments + 
-					             Communication_Emoluments + 
+		       Communication_Emoluments + 
                        Holiday_Emoluments + 
                        Leave_Allowance + 
                        13th_Month_Emoluments;
 
-##calculate the severance per staff & Summit findings to the Accounts department
+
 select
      Severance_to_be_paid.Staff_ID,
-    Severance_to_be_paid.First_name,
-    Severance_to_be_paid.Last_name,
-   (Severance_to_be_paid.Total_Emoluments * Severance_to_be_paid.Percentage/100) *12
-   as Severance
+     Severance_to_be_paid.First_name,
+     Severance_to_be_paid.Last_name,
+     (Severance_to_be_paid.Total_Emoluments * Severance_to_be_paid.Percentage/100) *12
+      as Severance
 from 
-   (
-select
-  employee_data.Staff_ID,
-  employee_data.First_name,
-  employee_data.Last_name,
-  employee_data.Exit_Date,
-  employee_data.Percentage,
-  employee_promotion.staff_rank,
-  employee_emoluments.Total_Emoluments
-from 
-  employee_data
-join employee_promotion
-on employee_data.Staff_ID=employee_promotion.Staff_ID
-join employee_emoluments
-on employee_emoluments.Staff_Rank=employee_promotion.Staff_Rank
- ) as  Severance_to_be_paid
- group by  
-	  Severance_to_be_paid.Staff_ID,
-    Severance_to_be_paid.First_name,
-    Severance_to_be_paid.Last_name,
-    (Severance_to_be_paid.Total_Emoluments * Severance_to_be_paid.Percentage/100) *12;
+         (
+            select
+              employee_data.Staff_ID,
+              employee_data.First_name,
+              employee_data.Last_name,
+              employee_data.Exit_Date,
+              employee_data.Percentage,
+              employee_promotion.staff_rank,
+              employee_emoluments.Total_Emoluments
+           from 
+              employee_data
+           join employee_promotion
+           on employee_data.Staff_ID=employee_promotion.Staff_ID
+           join employee_emoluments
+           on employee_emoluments.Staff_Rank=employee_promotion.Staff_Rank
+           ) as  Severance_to_be_paid
+          group by  
+	     Severance_to_be_paid.Staff_ID,
+             Severance_to_be_paid.First_name,
+             Severance_to_be_paid.Last_name,
+            (Severance_to_be_paid.Total_Emoluments * Severance_to_be_paid.Percentage/100) *12;
   
   
   
